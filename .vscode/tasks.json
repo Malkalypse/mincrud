@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Snapshot & Push",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"git add . && git commit -m \"Snapshot: $(date +%Y-%m-%d\\ %H:%M:%S)\" && git push"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
