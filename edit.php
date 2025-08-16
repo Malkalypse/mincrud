@@ -1,5 +1,5 @@
 <?php
-require 'core/functions.php';
+require 'core/sql.php';
 
 $table = $_GET['table'] ?? null;
 $id    = $_GET['id'] ?? null;

@@ -1,8 +1,12 @@
 <?php
-require 'core/functions.php';
+require 'core/sql.php';
 
-$table = $_GET['table'] ?? null;
-$id    = $_GET['id'] ?? null;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  exit('Invalid request method');
+}
+
+$table = $_POST['table'] ?? null;
+$id    = $_POST['id']    ?? null;
 
 if( !$table || !$id ) die("Missing table or ID");
 
