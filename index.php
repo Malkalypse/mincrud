@@ -31,26 +31,7 @@ if( $_SERVER['REQUEST_METHOD'] === 'POST' && $table ) {
 
 ?>
 
-<style>
-.edit-input {
-  display: none;
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  text-align: inherit;
-  outline: 1px solid rgba(0, 0, 0, 0.2);
-  box-sizing: content-box;
-}
-tr.editing .edit-input {
-    display: inline-block;
-}
-tr.editing .display-text {
-    display: none;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 
 <form method="get">
 	<select name="table" onchange="this.form.submit()">
@@ -209,22 +190,22 @@ tr.editing .display-text {
     updateWidth();
   }
 
-function measureSpanWidth( text, referenceCell ) {
-	const span = document.createElement( 'span' );
-	span.textContent = text;
-	span.style.visibility = 'hidden';
-	span.style.whiteSpace = 'nowrap';
+	function measureSpanWidth( text, referenceCell ) {
+		const span = document.createElement( 'span' );
+		span.textContent = text;
+		span.style.visibility = 'hidden';
+		span.style.whiteSpace = 'nowrap';
 
-	const style = getComputedStyle( referenceCell );
-	span.style.font = style.font;
-	span.style.fontSize = style.fontSize;
-	span.style.fontFamily = style.fontFamily;
-	span.style.letterSpacing = style.letterSpacing;
+		const style = getComputedStyle( referenceCell );
+		span.style.font = style.font;
+		span.style.fontSize = style.fontSize;
+		span.style.fontFamily = style.fontFamily;
+		span.style.letterSpacing = style.letterSpacing;
 
-	document.body.appendChild( span );
-	const width = span.getBoundingClientRect().width;
-	document.body.removeChild( span );
+		document.body.appendChild( span );
+		const width = span.getBoundingClientRect().width;
+		document.body.removeChild( span );
 
-	return width;
-}
+		return width;
+	}
 </script>

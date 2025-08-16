@@ -1,0 +1,18 @@
+.edit-input {
+  display: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: inherit;
+  outline: 1px solid rgba(0, 0, 0, 0.2);
+  box-sizing: content-box;
+}
+tr.editing .edit-input {
+    display: inline-block;
+}
+tr.editing .display-text {
+    display: none;
+}
