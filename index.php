@@ -17,8 +17,16 @@ $primary = $table ? get_primary_key( $table ) : null;
 </head>
 <body>
 
-<?php renderTableDropdown( $tables, $table ); ?>
-<?php renderTable( $table, $columns, $primary ) ?>
+<?php
+  renderTableDropdown( $tables, $table );
+
+  if( isset($_GET['error']) ) {
+      echo '<div class="error" style="color: red; margin: 1em 0;">'
+      . htmlspecialchars($_GET['error']) . '</div>';
+  }
+
+  renderTable( $table, $columns, $primary )
+?>
 
 <script type="module" src="js/script.js"></script>
 

@@ -20,29 +20,50 @@ require_once 'sql.php';
  *
  * @return void
  */
-function handleInsertRequest( string $table, array $columns ): void {
+function handleInsertRequest( array $post ): void {
+    global $pdo;
 
-	$data = [];
+    $table = $post['table'] ?? '';
+    $data  = $post['data'] ?? [];
 
-	foreach( $columns as $col ) {
-		$name = $col['Field'];
-		$type = strtolower( $col['Type'] );
+    if( !$table || !is_array($data) ) {
+        redirectWithError($table, "Invalid form submission.");
+    }
 
-		// Auto-increment columns are handled by the database
-		if( $col['Extra'] === 'auto_increment' ) continue;
+    $columns = array_keys($data);
+    $placeholders = array_map(fn($col) => ":$col", $columns);
+    $sql = "INSERT INTO `$table` (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
 
-		// Auto-fill timestamp columns
-		if( in_array( $name, [ 'created_at', 'sent_at' ] ) && str_contains( $type, 'datetime' ) ) {
-			$data[$name] = date( 'Y-m-d H:i:s' );
-		} else {
-			$data[$name] = $_POST[$name] ?? null;
-		}
-	}
+    try {
+        $stmt = $pdo->prepare($sql);
+        foreach( $data as $key => $value ) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->execute();
 
-	insert( $table, $data );
+        header("Location: ../index.php?table=" . urlencode($table));
+        exit;
+    } catch( PDOException $e ) {
+        redirectWithError($table, parseDbError($e));
+    }
+}
 
-	// Redirect to index.php with current table preserved in query
-	header( "Location: ../index.php?table=" . urlencode( $table ) );
-	
-	exit;
+function redirectWithError( string $table, string $message ): void {
+    header("Location: ../index.php?table=" . urlencode($table) . "&error=" . urlencode($message));
+    exit;
+}
+
+function parseDbError( PDOException $e ): string {
+    $msg = $e->getMessage();
+
+    if( str_contains($msg, 'Integrity constraint violation') ) {
+        return "Insert failed: Invalid or missing data.";
+    }
+    if( str_contains($msg, 'cannot be null') ) {
+        return "Insert failed: Required field missing.";
+    }
+    if( str_contains($msg, 'Duplicate entry') ) {
+        return "Insert failed: Duplicate value.";
+    }
+    return "Insert failed: Database error.";
 }
