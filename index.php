@@ -24,7 +24,7 @@ if( $_SERVER['REQUEST_METHOD'] === 'POST' && $table ) {
 <?php renderTableDropdown( $tables, $table ); ?>
 <?php renderTable( $table, $columns, $primary ) ?>
 
-<script type="module" src="script.js"></script>
+<script type="module" src="js/script.js"></script>
 
 </body>
 </html>
