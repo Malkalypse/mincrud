@@ -1,16 +1,12 @@
 <?php
 require_once 'db/sql.php';
-require_once 'insert.php';
+require_once 'actions.php';
 require_once 'render.php';
 
 $table = $_GET['table'] ?? '';
 $tables = get_table_names();
 $columns = $table ? get_columns( $table ) : [];
 $primary = $table ? get_primary_key( $table ) : null;
-
-if( $_SERVER['REQUEST_METHOD'] === 'POST' && $table ) {
-	handleInsertRequest( $table, $columns );
-}
 ?>
 
 <!DOCTYPE html>
