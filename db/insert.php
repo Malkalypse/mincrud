@@ -10,7 +10,7 @@ if( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
 
 $table = $_POST['table'] ?? '';
 $columns = get_columns( $table );
-handleInsertRequest( $table, $columns );
+handleInsertRequest( $_POST );
 
 header("Location: index.php?table=" . urlencode( $table ));
 exit;
