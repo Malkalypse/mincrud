@@ -1,5 +1,5 @@
 <?php
-require_once 'core/sql.php';
+require_once 'db/sql.php';
 require_once 'actions.php';
 require_once 'render.php';
 

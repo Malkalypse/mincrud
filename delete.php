@@ -1,5 +1,5 @@
 <?php
-require 'core/sql.php';
+require 'db/sql.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit('Invalid request method');

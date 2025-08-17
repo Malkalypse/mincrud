@@ -1,5 +1,5 @@
 <?php
-require 'core/sql.php';
+require 'db/sql.php';
 
 $table = $_POST['table'] ?? null;
 $id    = $_POST['id'] ?? null;

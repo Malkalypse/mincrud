@@ -14,7 +14,7 @@ function renderTableDropdown(array $tables, string $selectedTable): void {
 
 				<!-- Render escaped table name as both value and label -->
 				<option value="<?= htmlspecialchars($table) ?>"
-				        <?= $table === $selectedTable ? 'selected' : '' ?>> <!-- mark selected table -->
+					<?= $table === $selectedTable ? 'selected' : '' ?>> <!-- mark selected table -->
 					<?= htmlspecialchars($table) ?>
 				</option>
 
@@ -53,8 +53,8 @@ function renderTable(?string $table, array $columns, ?string $primary): void {
 		</tr>
 
 		<?php
-			renderInsertRow($columns); // Add row inputs linked to #add-form
-			renderTableRows($table, $columns, $primary); // Existing data rows
+			renderInsertRow( $columns ); // Add row inputs linked to #add-form
+			renderTableRows( $table, $columns, $primary ); // Existing data rows
 		?>
 	</table>
 	<?php
@@ -75,8 +75,9 @@ function renderInsertRow(array $columns): void {
 				<!-- Render editable input -->
 				<?php else: ?>
 					<input name="<?= htmlspecialchars($name) ?>"
-					       class="add-input"
-					       form="add-form" />
+						class="add-input"
+						form="add-form"
+					/>
 				<?php endif; ?>
 			</td>
 		<?php endforeach; ?>
