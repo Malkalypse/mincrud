@@ -11,7 +11,5 @@ $table = $_POST['table'] ?? '';
 $columns = get_columns( $table );
 handleInsertRequest( $table, $columns );
 
-var_dump( $_POST );
-
 header("Location: index.php?table=" . urlencode( $table ));
 exit;

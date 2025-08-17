@@ -39,7 +39,7 @@ function renderTable(?string $table, array $columns, ?string $primary): void {
 	<h2>Table: <?= htmlspecialchars($table) ?></h2>
 
 	<!-- Begin POST form for inserting new rows -->
-	<form method="post" id="add-form">
+	<form method="post" action="insert.php" id="add-form">
 		<input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>" />
 	</form>
 
