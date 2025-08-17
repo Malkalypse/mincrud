@@ -1,6 +1,6 @@
 <?php
 require_once 'db/sql.php';
-require_once 'actions.php';
+require_once 'insert.php';
 require_once 'render.php';
 
 $table = $_GET['table'] ?? '';
