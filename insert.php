@@ -46,3 +46,10 @@ function handleInsertRequest( string $table, array $columns ): void {
 	
 	exit;
 }
+
+if( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['table'] ) ) {
+	$table = $_POST['table'];
+	$columns = get_columns( $table ); // or however you fetch column metadata
+
+	handleInsertRequest( $table, $columns );
+}
