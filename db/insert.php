@@ -1,5 +1,5 @@
 <?php
-require_once 'db/sql.php';
+require_once 'sql.php';
 require_once 'actions.php';
 
 if( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {

@@ -1,5 +1,5 @@
 <?php
-require_once 'db/sql.php';
+require_once 'sql.php';
 
 /**
  * Handles an insert request for a given table using column metadata.
@@ -42,7 +42,7 @@ function handleInsertRequest( string $table, array $columns ): void {
 	insert( $table, $data );
 
 	// Redirect to index.php with current table preserved in query
-	header( "Location: index.php?table=" . urlencode( $table ) );
+	header( "Location: ../index.php?table=" . urlencode( $table ) );
 	
 	exit;
 }

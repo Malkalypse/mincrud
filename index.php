@@ -1,6 +1,6 @@
 <?php
 require_once 'db/sql.php';
-require_once 'actions.php';
+require_once 'db/actions.php';
 require_once 'render.php';
 
 $table = $_GET['table'] ?? '';
@@ -13,7 +13,7 @@ $primary = $table ? get_primary_key( $table ) : null;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 

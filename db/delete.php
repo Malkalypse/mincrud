@@ -1,5 +1,5 @@
 <?php
-require 'db/sql.php';
+require 'sql.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit('Invalid request method');
@@ -13,5 +13,5 @@ if( !$table || !$id ) die("Missing table or ID");
 $pk = get_primary_key( $table );
 
 delete( $table, "$pk = :id", [ 'id' => $id ] );
-header( "Location: index.php?table=" . urlencode( $table ) );
+header( "Location: ../index.php?table=" . urlencode( $table ) );
 exit;

@@ -212,7 +212,7 @@ function buildPayload( row ) {
  * Alerts if the response is not 'OK'.
  */
 function sendUpdate( payload ) {
-	fetch( 'update.php', {
+	fetch( 'db/update.php', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		body: new URLSearchParams( payload )

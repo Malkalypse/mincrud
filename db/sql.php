@@ -6,7 +6,7 @@
  * @requires db.php     Defines and configures $pdo
  */
 
-require_once 'db/db.php';
+require_once 'db.php';
 
 
 // ─────────────────────────────────────────────
