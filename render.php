@@ -164,7 +164,7 @@ function renderActionCell(string $table, array $row, ?string $primary): void {
 }
 
 // Renders an inline POST form for deleting a row.
-function renderDeleteForm(string $tableName, string $id): void {
+function renderDeleteForm( string $tableName, string $id ): void {
 	?>
 
 	<!-- Inline delete form with confirmation-->
@@ -172,11 +172,11 @@ function renderDeleteForm(string $tableName, string $id): void {
 		method="post"
 		action="db/delete.php"
 		style="display:inline;"
-		onsubmit="return confirm('Delete this row?')"
+		onsubmit="return confirm( 'Delete this row?' )"
 	>
 		<!-- Hidden inputs to identify table and row -->
-		<input type="hidden" name="table" value="<?= htmlspecialchars($tableName) ?>" />
-		<input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>" />
+		<input type="hidden" name="table" value="<?= htmlspecialchars( $tableName ) ?>" />
+		<input type="hidden" name="id" value="<?= htmlspecialchars( $id ) ?>" />
 
 		<button type="submit" class="delete-btn">Delete</button>
 	</form>

@@ -119,6 +119,7 @@ function buildDataArray( array $columns, array $input, array $skip = [] ): array
 }
 
 // Handles errors by setting HTTP response code and redirecting or echoing.
+/*
 function handleError( int $code, ?string $table, string $message ): void {
 	http_response_code( $code ); // set HTTP response code
 
@@ -133,6 +134,25 @@ function handleError( int $code, ?string $table, string $message ): void {
 
 	exit;
 }
+*/
+/*
+function handleError( int $code, ?string $table, string $message ): void {
+  http_response_code( $code );
+  echo $message; // Just output the error message
+  exit;
+}
+*/
+function handleError( int $code, ?string $table, string $message ): void {
+    http_response_code( $code );
+    $isAjax = isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+    if( php_sapi_name() === 'cli' || empty( $_SERVER['HTTP_HOST' ] ) || $isAjax ) {
+        echo $message;
+    } else {
+        header( "Location: ../index.php?table=" . urlencode( $table ?? '' ) . "&error=" . urlencode( $message ) );
+    }
+    exit;
+}
+
 
 // Parses PDOException messages to return user-friendly error descriptions.
 function parseDbError( PDOException $e ): string {

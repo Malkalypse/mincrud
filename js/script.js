@@ -9,25 +9,14 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	if( !table ) return;
 
 	const colCount = table.rows[0].cells.length;
-	const addRow = table.querySelector( 'tr.add-row' ); // updated selector
-	const addInputs = table.querySelectorAll( '.add-input' );
+	//const addRow = table.querySelector( 'tr.add-row' );
+	//const addInputs = table.querySelectorAll( '.add-input' );
 
 	for( let colIndex = 0; colIndex < colCount - 1; colIndex++ ) {
-		// Initial sizing for all columns
-		autoSizeInputs( table, colIndex );
-
-		/*
-		// Attach live resizing for "Add" row inputs
-		const input = addInputs[colIndex];
-		if( input ) {
-			input.addEventListener( 'input', () => {
-				autoSizeInputs( table, colIndex );
-			} );
-		}
-		*/
+		autoSizeInputs( table, colIndex ); // initial sizing for all columns
 	}
 
-	// 🔧 Global listener for any input in the table
+	// Global listener for any input in the table
 	table.addEventListener( 'input', e => {
 		const td = e.target.closest( 'td' );
 		if( !td ) return;
@@ -211,6 +200,7 @@ function buildPayload( row ) {
  * Sends a POST request to update.php with the given URL-encoded payload.
  * Alerts if the response is not 'OK'.
  */
+/*
 function sendUpdate( payload ) {
 	fetch( 'db/update.php', {
 		method: 'POST',
@@ -220,6 +210,26 @@ function sendUpdate( payload ) {
 		.then( r => r.text() )
 		.then( text => {
 			if( text !== 'OK' ) alert( 'Update failed: ' + text );
+		} );
+}
+*/
+function sendUpdate( payload ) {
+	fetch( 'db/update.php', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'X-Requested-With': 'XMLHttpRequest' // <--- Add this line
+		},
+		body: new URLSearchParams( payload )
+	} )
+		.then( r => r.text() )
+		.then( text => {
+			const errorDiv = document.getElementById( 'error-message' );
+			if( text.trim() !== 'OK' ) {
+				errorDiv.textContent = 'Error: ' + text;
+			} else {
+				errorDiv.textContent = '';
+			}
 		} );
 }
 
