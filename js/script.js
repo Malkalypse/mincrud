@@ -23,6 +23,32 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		const colIndex = getColumnIndex( td );
 		autoSizeInputs( table, colIndex );
 	} );
+
+	// Intercept Add form submission
+	const addForm = document.getElementById( 'add-form' );
+	if( addForm ) {
+		addForm.addEventListener( 'submit', function ( e ) {
+			e.preventDefault();
+			const formData = new FormData( addForm );
+			const payload = Object.fromEntries( formData.entries() );
+			sendInsert( payload );
+		} );
+	}
+
+	// Intercept Delete form submission (event delegation)
+	document.body.addEventListener( 'submit', function ( e ) {
+		const form = e.target;
+		// Match any form containing a .delete-btn button
+		if( form.querySelector( 'button.delete-btn' ) ) {
+			e.preventDefault();
+			const formData = new FormData( form );
+			const payload = Object.fromEntries( formData.entries() );
+			if( confirm( 'Delete this row?' ) ) {
+				sendDelete( payload );
+			}
+		}
+	} );
+
 } );
 
 // Set button actions
@@ -190,6 +216,86 @@ function buildPayload( row ) {
 	return payload;
 }
 
+function sendInsert( payload ) {
+	fetch( 'db/insert.php', {
+		method: 'POST',
+		headers: { 'X-Requested-With': 'XMLHttpRequest' },
+		body: new URLSearchParams( payload )
+	} )
+		.then( r => r.json() )
+		.then( data => {
+			const errorDiv = document.getElementById( 'error-message' );
+			if( data.status === 'OK' && data.row ) {
+				errorDiv.textContent = '';
+				addTableRow( data.row, payload ); // Pass payload as second argument
+				clearAddInputs();
+			} else if( data.error ) {
+				errorDiv.textContent = 'Error: ' + data.error;
+			} else {
+				errorDiv.textContent = 'Unknown error';
+			}
+		} );
+}
+// Helper to clear add row inputs
+function clearAddInputs() {
+	document.querySelectorAll( '.add-input' ).forEach( input => input.value = '' );
+}
+
+// Helper to add a new row to the table
+function addTableRow( rowData, payload ) {
+	const table = document.querySelector( 'table' );
+	const addRow = table.querySelector( '.add-row' );
+	const newRow = document.createElement( 'tr' );
+	newRow.setAttribute( 'data-id', rowData.id ); // Adjust if your PK is not 'id'
+
+	// Build cells
+	[...addRow.parentNode.querySelectorAll( 'th' )].forEach( ( th, i ) => {
+		if( i < Object.keys( rowData ).length ) {
+			const field = th.textContent.trim();
+			const td = document.createElement( 'td' );
+			td.innerHTML = `<span class="display-text">${rowData[field]}</span><input class="edit-input" type="text" value="${rowData[field] || ''}" />`;
+			newRow.appendChild( td );
+		}
+	} );
+	// Add actions cell (reuse existing HTML or build in JS)
+	const actionsTd = document.createElement( 'td' );
+	actionsTd.className = 'action-cell';
+	actionsTd.innerHTML = `
+        <button class="edit-btn">Edit</button>
+        <button class="save-btn" style="display:none;">Save</button>
+        <button class="cancel-btn" style="display:none;">Cancel</button>
+        <form method="post" style="display:inline;">
+            <input type="hidden" name="table" value="${payload.table}" />
+            <input type="hidden" name="id" value="${rowData.id}" />
+            <button type="submit" class="delete-btn">Delete</button>
+        </form>
+    `;
+	newRow.appendChild( actionsTd );
+
+	addRow.parentNode.appendChild( newRow );
+}
+
+function sendDelete( payload ) {
+	fetch( 'db/delete.php', {
+		method: 'POST',
+		headers: { 'X-Requested-With': 'XMLHttpRequest' },
+		body: new URLSearchParams( payload )
+	} )
+		.then( r => r.json() )
+		.then( data => {
+			const errorDiv = document.getElementById( 'error-message' );
+			if( data.status === 'OK' ) {
+				errorDiv.textContent = '';
+				const row = document.querySelector( `tr[data-id="${payload.id}"]` );
+				if( row ) row.remove();
+			} else if( data.error ) {
+				errorDiv.textContent = 'Error: ' + data.error;
+			} else {
+				errorDiv.textContent = 'Unknown error';
+			}
+		} );
+}
+
 /**
  * Sends a POST request to update.php with the given URL-encoded payload.
  * Alerts if the response is not 'OK'.
@@ -203,15 +309,33 @@ function sendUpdate( payload ) {
 		},
 		body: new URLSearchParams( payload )
 	} )
-		.then( r => r.text() )
-		.then( text => {
+		.then( r => r.json() )
+		.then( data => {
 			const errorDiv = document.getElementById( 'error-message' );
-			if( text.trim() !== 'OK' ) {
-				errorDiv.textContent = 'Error: ' + text;
-			} else {
+			if( data.status === 'OK' ) {
 				errorDiv.textContent = '';
+				updateTableRow( payload.id, payload ); // You may want to fetch the updated row from backend for accuracy
+			} else if( data.error ) {
+				errorDiv.textContent = 'Error: ' + data.error;
+			} else {
+				errorDiv.textContent = 'Unknown error';
 			}
 		} );
 }
 
+// Helper to update a row in the table
+function updateTableRow( id, newData ) {
+	const row = document.querySelector( `tr[data-id="${id}"]` );
+	if( !row ) return;
+	Object.keys( newData ).forEach( field => {
+		const cell = row.querySelector( `td[data-field="${field}"]` );
+		if( cell ) {
+			const span = cell.querySelector( '.display-text' );
+			const input = cell.querySelector( '.edit-input' );
+			if( span ) span.textContent = newData[field];
+			if( input ) input.value = newData[field];
+		}
+	} );
+	row.classList.remove( 'editing' );
+}
 

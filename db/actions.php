@@ -25,7 +25,7 @@ Response codes --
  *
  * @return void
  */
-function insertRequest( array $post ): void {
+function insertRequest( array $post ): array {
 	global $pdo;
 
 	$table = $post[ 'table' ] ?? '';
@@ -46,11 +46,17 @@ function insertRequest( array $post ): void {
 		}
 		$stmt->execute();
 
-		header( "Location: ../index.php?table=" . urlencode( $table ) ); // reload index with table selected
-		exit;
+        $id = $pdo->lastInsertId();
+        $primary = get_primary_key($table);
+        // Fetch the inserted row
+        $row = fetch($table, "$primary = :id", ['id' => $id]);
+        return $row;
+
 	} catch( PDOException $e ) {
 		handleError( 400, $table, parseDbError( $e ) );
 	}
+	
+	return [];
 }
 
 /**
@@ -85,10 +91,12 @@ function updateRequest( array $post ): void {
 		if( !$ok ) {
 			handleError( 500, $table, 'Update failed' );
 		} else {
-			echo 'OK';
+			//echo 'OK';
+			echo json_encode(['status' => 'OK']);
 		}
+
 	} catch( Exception $e ) {
-		handleError( 500, $table, 'Error: ' . $e->getMessage() );
+		handleError( 500, $table, $e->getMessage() );
 	}
 }
 
@@ -119,37 +127,9 @@ function buildDataArray( array $columns, array $input, array $skip = [] ): array
 }
 
 // Handles errors by setting HTTP response code and redirecting or echoing.
-/*
-function handleError( int $code, ?string $table, string $message ): void {
-	http_response_code( $code ); // set HTTP response code
-
-	// If running in CLI or no HTTP context, just echo the message
-	if( php_sapi_name() === 'cli' || empty( $_SERVER[ 'HTTP_HOST' ] ) ) {
-		echo $message;
-	}
-	// Otherwise, redirect back to index.php with error message
-	else {
-		header( "Location: ../index.php?table=" . urlencode( $table ?? '' ) . "&error=" . urlencode( $message ) );
-	}
-
-	exit;
-}
-*/
-/*
-function handleError( int $code, ?string $table, string $message ): void {
-  http_response_code( $code );
-  echo $message; // Just output the error message
-  exit;
-}
-*/
 function handleError( int $code, ?string $table, string $message ): void {
     http_response_code( $code );
-    $isAjax = isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
-    if( php_sapi_name() === 'cli' || empty( $_SERVER['HTTP_HOST' ] ) || $isAjax ) {
-        echo $message;
-    } else {
-        header( "Location: ../index.php?table=" . urlencode( $table ?? '' ) . "&error=" . urlencode( $message ) );
-    }
+		echo json_encode(['error' => $message]);
     exit;
 }
 

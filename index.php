@@ -20,13 +20,7 @@ $primary = $table ? get_primary_key( $table ) : null;
 
 <?php renderTableDropdown( $tables, $table ); ?>
 
-<div id="error-message" style="color: red; margin: 1em 0;">
-<?php
-	if( isset( $_GET[ 'error' ] ) ) {
-		echo htmlspecialchars( $_GET[ 'error' ] );
-	}
-?>
-</div>
+<div id="error-message" style="color: red; margin: 1em 0;"></div>
 
 <?php renderTable( $table, $columns, $primary ) ?>
 

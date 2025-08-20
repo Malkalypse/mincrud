@@ -39,7 +39,7 @@ function renderTable( ?string $table, array $columns, ?string $primary ): void {
 	<h2>Table: <?= htmlspecialchars( $table ) ?></h2>
 
 	<!-- Begin POST form for inserting new rows -->
-	<form method="post" action="db/insert.php" id="add-form">
+	<form method="post" id="add-form">
 		<input type="hidden" name="table" value="<?= htmlspecialchars( $table ) ?>" />
 	</form>
 
@@ -170,9 +170,7 @@ function renderDeleteForm( string $tableName, string $id ): void {
 	<!-- Inline delete form with confirmation-->
 	<form
 		method="post"
-		action="db/delete.php"
 		style="display:inline;"
-		onsubmit="return confirm( 'Delete this row?' )"
 	>
 		<!-- Hidden inputs to identify table and row -->
 		<input type="hidden" name="table" value="<?= htmlspecialchars( $tableName ) ?>" />
