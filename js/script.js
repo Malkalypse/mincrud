@@ -1,27 +1,29 @@
-import { getColumnIndex, autoSizeInputs } from './utilities.js';
+import { getColumnIndex, autoSize, autoSizeAll } from './utilities.js';
 
 // ─────────────────────────────────────────────
 // Action Button Functions
 // ─────────────────────────────────────────────
 
+
 document.addEventListener( 'DOMContentLoaded', () => {
 	const table = document.querySelector( 'table' );
 	if( !table ) return;
 
-	const colCount = table.rows[0].cells.length;
-	//const addRow = table.querySelector( 'tr.add-row' );
-	//const addInputs = table.querySelectorAll( '.add-input' );
+	autoSizeAll( table );
 
-	for( let colIndex = 0; colIndex < colCount - 1; colIndex++ ) {
-		autoSizeInputs( table, colIndex ); // initial sizing for all columns
-	}
+	// Bind actions for all existing rows (except the add-row)
+	table.querySelectorAll( 'tr' ).forEach( row => {
+		if( !row.classList.contains( 'add-row' ) ) {
+			bindActions( row );
+		}
+	} );
 
 	// Global listener for any input in the table
 	table.addEventListener( 'input', e => {
 		const td = e.target.closest( 'td' );
 		if( !td ) return;
 		const colIndex = getColumnIndex( td );
-		autoSizeInputs( table, colIndex );
+		autoSize( table, colIndex );
 	} );
 
 	// Intercept Add form submission
@@ -51,21 +53,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 } );
 
-// Set button actions
-document.querySelectorAll( 'table' ).forEach( table => {
-	table.addEventListener( 'click', event => {
-		const button = event.target;
-		const row = button.closest( 'tr' );
+// Bind action buttons for existing rows
+function bindActions( row ) {
+	const editBtn = row.querySelector( '.edit-btn' );
+	const saveBtn = row.querySelector( '.save-btn' );
+	const cancelBtn = row.querySelector( '.cancel-btn' );
 
-		if( button.classList.contains( 'edit-btn' ) ) {
-			enterEditMode( row );
-		} else if( button.classList.contains( 'save-btn' ) ) {
-			saveRow( row );
-		} else if( button.classList.contains( 'cancel-btn' ) ) {
-			cancelEdit( row );
-		}
-	} );
-} );
+	if( editBtn ) editBtn.addEventListener( 'click', () => enterEditMode( row ) );
+	if( saveBtn ) saveBtn.addEventListener( 'click', () => saveRow( row ) );
+	if( cancelBtn ) cancelBtn.addEventListener( 'click', () => cancelEdit( row ) );
+}
 
 // Enable editing for a given table row
 function enterEditMode( row ) {
@@ -96,7 +93,7 @@ function applyColumnWidths( row, table ) {
 
 		if( !updatedCols.has( colIndex ) ) {
 			updatedCols.add( colIndex );
-			autoSizeInputs( table, colIndex );
+			autoSize( table, colIndex );
 		}
 	} );
 }
@@ -127,12 +124,12 @@ function trackInputChanges( row ) {
 				: '';
 
 			const colIndex = getColumnIndex( input.closest( 'td' ) );
-			autoSizeInputs( table, colIndex );
+			autoSize( table, colIndex );
 		} );
 
 		editableCells.forEach( ( { input } ) => {
 			const colIndex = getColumnIndex( input.closest( 'td' ) );
-			autoSizeInputs( table, colIndex );
+			autoSize( table, colIndex );
 		} );
 
 	} );
@@ -165,7 +162,7 @@ function cancelEdit( row ) {
 		const colIndex = getColumnIndex( input.closest( 'td' ) );
 		if( !updatedCols.has( colIndex ) ) {
 			updatedCols.add( colIndex );
-			autoSizeInputs( table, colIndex );
+			autoSize( table, colIndex );
 		}
 	} );
 
@@ -253,6 +250,7 @@ function addTableRow( rowData, payload ) {
 		if( i < Object.keys( rowData ).length ) {
 			const field = th.textContent.trim();
 			const td = document.createElement( 'td' );
+			td.setAttribute( 'data-field', field ); // Add data-field for consistency
 			td.innerHTML = `<span class="display-text">${rowData[field]}</span><input class="edit-input" type="text" value="${rowData[field] || ''}" />`;
 			newRow.appendChild( td );
 		}
@@ -270,10 +268,13 @@ function addTableRow( rowData, payload ) {
             <button type="submit" class="delete-btn">Delete</button>
         </form>
     `;
-	newRow.appendChild( actionsTd );
 
+	newRow.appendChild( actionsTd );
 	addRow.parentNode.appendChild( newRow );
+	autoSizeAll( table );
+	bindActions( newRow );
 }
+
 
 function sendDelete( payload ) {
 	fetch( 'db/delete.php', {
@@ -288,6 +289,8 @@ function sendDelete( payload ) {
 				errorDiv.textContent = '';
 				const row = document.querySelector( `tr[data-id="${payload.id}"]` );
 				if( row ) row.remove();
+				const table = document.querySelector( 'table' );
+				autoSizeAll( table );
 			} else if( data.error ) {
 				errorDiv.textContent = 'Error: ' + data.error;
 			} else {
@@ -337,5 +340,7 @@ function updateTableRow( id, newData ) {
 		}
 	} );
 	row.classList.remove( 'editing' );
+	const table = row.closest( 'table' );
+	autoSizeAll( table );
 }
 

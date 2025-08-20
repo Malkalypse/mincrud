@@ -1,5 +1,6 @@
 <?php
 require_once 'sql.php';
+require_once 'errors.php';
 
 /*
 Response codes --
@@ -31,7 +32,7 @@ function insertRequest( array $post ): array {
 	$table = $post[ 'table' ] ?? '';
 	$columns = validateTableAndColumns( $table );
 	$data = buildDataArray( $columns, $post );
-	if( empty( $data ) ) handleError( 400, $table, "No data to insert." );
+	if( empty( $data ) ) handleError( 400, "No data to insert." );
 
 	// Build and execute the INSERT statement
 	$colNames = array_keys( $data );
@@ -53,9 +54,9 @@ function insertRequest( array $post ): array {
         return $row;
 
 	} catch( PDOException $e ) {
-		handleError( 400, $table, parseDbError( $e ) );
+		handleError( 400, parseDbError( $e ) );
 	}
-	
+
 	return [];
 }
 
@@ -71,14 +72,14 @@ function insertRequest( array $post ): array {
 function updateRequest( array $post ): void {
 	$table = $_POST[ 'table' ] ?? '';
 	$id    = $_POST[ 'id' ] ?? null;
-  if( !$table || !$id ) { handleError( 400, $table, 'Missing table or ID' ); }
+  if( !$table || !$id ) { handleError( 400, 'Missing table or ID' ); }
 
 	$columns = validateTableAndColumns( $table );
 	$primary = get_primary_key( $table );
-	if( !$primary ) handleError( 500, $table, 'Primary key not found' );
+	if( !$primary ) handleError( 500, 'Primary key not found' );
 
 	$data = buildDataArray( $columns, $post, [$primary] ); // build data array, skipping primary key column
-	if( empty( $data ) ) handleError( 400, $table, 'No updatable fields provided' );
+	if( empty( $data ) ) handleError( 400,'No updatable fields provided' );
 
 	// Build WHERE clause and parameters for the update
 	$where       = quote_ident( $primary ) . ' = :' . $primary;
@@ -86,25 +87,18 @@ function updateRequest( array $post ): void {
 
 	try {
 		$ok = update( $table, $data, $where, $whereParams ); // perform the update operation
-
-		// Return success or failure response
-		if( !$ok ) {
-			handleError( 500, $table, 'Update failed' );
-		} else {
-			//echo 'OK';
-			echo json_encode(['status' => 'OK']);
-		}
+		if( !$ok ) handleError( 500, 'Update failed' );
 
 	} catch( Exception $e ) {
-		handleError( 500, $table, $e->getMessage() );
+		handleError( 500, $e->getMessage() );
 	}
 }
 
 // Validates the table name and retrieves its columns, handling errors as needed.
 function validateTableAndColumns( string $table ): array {
-  if( !$table ) handleError( 400, $table, "Invalid table." );
+  if( !$table ) handleError( 400, "Invalid table." );
   $columns = get_columns( $table );
-  if( !$columns ) handleError( 400, $table, "Table has no columns." );
+  if( !$columns ) handleError( 400, "Table has no columns." );
   return $columns;
 }
 
@@ -126,27 +120,4 @@ function buildDataArray( array $columns, array $input, array $skip = [] ): array
 	return $data;
 }
 
-// Handles errors by setting HTTP response code and redirecting or echoing.
-function handleError( int $code, ?string $table, string $message ): void {
-    http_response_code( $code );
-		echo json_encode(['error' => $message]);
-    exit;
-}
 
-
-// Parses PDOException messages to return user-friendly error descriptions.
-function parseDbError( PDOException $e ): string {
-	$msg = $e->getMessage();
-
-	if( str_contains( $msg, 'Integrity constraint violation' ) ) {
-		return "Insert failed: Invalid or missing data.";
-	}
-	if( str_contains( $msg, 'cannot be null' ) ) {
-		return "Insert failed: Required field missing.";
-	}
-	if( str_contains( $msg, 'Duplicate entry' ) ) {
-		return "Insert failed: Duplicate value.";
-	}
-
-	return "Insert failed: Database error.";
-}

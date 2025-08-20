@@ -1,30 +1,20 @@
 <?php
-require_once 'sql.php';
+require_once 'errors.php';
 
-header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method Not Allowed']);
-    exit;
-}
+require_method( 'POST' );
 
 $table = $_POST['table'] ?? null;
 $id    = $_POST['id']    ?? null;
 
-if (!$table || !$id) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Missing table or ID']);
-    exit;
+if( !$table || !$id ) {
+	send_json( [ 'error' => 'Missing table or ID' ], 400 );
 }
 
-$pk = get_primary_key($table);
+$pk = get_primary_key( $table );
 
 try {
-    delete($table, "$pk = :id", ['id' => $id]);
-    echo json_encode(['status' => 'OK']);
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+	delete( $table, "$pk = :id", [ 'id' => $id ] );
+	send_json( [ 'status' => 'OK' ] );
+} catch( Exception $e ) {
+	send_json( [ 'error' => $e->getMessage() ], 500 );
 }
-exit;

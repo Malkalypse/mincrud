@@ -1,20 +1,11 @@
 <?php
-require_once 'sql.php';
-require_once 'actions.php';
+require_once 'errors.php';
 
-header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method Not Allowed']);
-    exit;
-}
+require_method( 'POST' );
 
 try {
-    updateRequest($_POST);
-    echo json_encode(['status' => 'OK']);
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode(['error' => $e->getMessage()]);
+	updateRequest( $_POST );
+	send_json( [ 'status' => 'OK' ] );
+} catch( Exception $e ) {
+	send_json( [ 'error' => $e->getMessage() ], 400 );
 }
-exit;

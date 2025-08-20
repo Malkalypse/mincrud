@@ -2,12 +2,20 @@
 // Resizing Input Fields
 // ─────────────────────────────────────────────
 
+export function autoSizeAll( table ) {
+	const colCount = table.rows[0]?.cells.length || 0;
+	// Optionally skip the last column if it's for actions
+	for( let colIndex = 0; colIndex < colCount - 1; colIndex++ ) {
+		autoSize( table, colIndex );
+	}
+}
+
 // This function automatically resizes input fields in a specified column of a table
-export function autoSizeInputs( table, colIndex ) {
+export function autoSize( table, colIndex ) {
 
 	const cells = Array.from( // get all cells in the specified column
 		table.querySelectorAll(
-			`tr td:nth-child(${ colIndex + 1 })` // adjust for 0-based index
+			`tr td:nth-child(${colIndex + 1})` // adjust for 0-based index
 		)
 	);
 
