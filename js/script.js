@@ -111,12 +111,6 @@ function trackInputChanges( row ) {
 
 	} );
 }
-/*
-function getColumnIndex( cell ) {
-	if( !cell || !cell.parentNode ) return -1;
-	return Array.from( cell.parentNode.children ).indexOf( cell );
-}
-*/
 
 // Commit edits for a row
 function saveRow( row ) {
@@ -200,25 +194,12 @@ function buildPayload( row ) {
  * Sends a POST request to update.php with the given URL-encoded payload.
  * Alerts if the response is not 'OK'.
  */
-/*
-function sendUpdate( payload ) {
-	fetch( 'db/update.php', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-		body: new URLSearchParams( payload )
-	} )
-		.then( r => r.text() )
-		.then( text => {
-			if( text !== 'OK' ) alert( 'Update failed: ' + text );
-		} );
-}
-*/
 function sendUpdate( payload ) {
 	fetch( 'db/update.php', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'X-Requested-With': 'XMLHttpRequest' // <--- Add this line
+			'X-Requested-With': 'XMLHttpRequest'
 		},
 		body: new URLSearchParams( payload )
 	} )
