@@ -13,18 +13,19 @@ require_once 'db.php';
 // Table Metadata Functions
 // ─────────────────────────────────────────────
 
-// Get a list of tables in the current database
+// Get a list of tables in the current database.
 function get_table_names(): array {
 	return query( "SHOW TABLES" )->fetchAll( PDO::FETCH_COLUMN );
 }
 
-// Get a table's primary column name
+// Get the primary key column name.
 function get_primary_key( string $table ): ?string {
 	foreach( get_columns( $table ) as $col ) {
 		if( $col['Key'] === 'PRI' ) return $col['Field'];
 	}
 	return null;
 }
+// Get column metadata for a given table.
 function get_columns( string $table ): array {
 	$rows = query(
 		"DESCRIBE " . quote_ident( $table ) // get all table columns and their properties
@@ -46,10 +47,11 @@ function insert( string $table, array $data ): bool {
 
 	return modify( $sql, $data );
 }
+// Builds the INSERT clause from data array.
 function build_insert_clause( array $data ): array {
 	$columns = array_keys( $data );
 	$placeholders = array_map(
-		fn( $col ) => ":$col", // convert column name into named placeholder
+		fn( $col ) => ":$col",
 		$columns
 	);
 
@@ -59,13 +61,14 @@ function build_insert_clause( array $data ): array {
 	];
 }
 
-// Update row(s)
+// Updates row(s).
 function update( string $table, array $data, string $where, array $whereParams ): bool {
 	$set = build_set_clause( $data );
 	$sql = "UPDATE " . quote_ident( $table ) . " SET $set WHERE $where";
 
 	return modify( $sql, array_merge( $data, $whereParams ) );
 }
+// Builds the SET clause for an UPDATE statement.
 function build_set_clause( array $data ): string {
 	return implode( ', ',
 		array_map(
@@ -75,7 +78,7 @@ function build_set_clause( array $data ): string {
 	);
 }
 
-// Delete row(s)
+// Delete row(s).
 function delete( string $table, string $where, array $params ): bool {
 	$sql = "DELETE FROM " . quote_ident( $table ) . " WHERE $where";
 	return modify( $sql, $params );
@@ -98,7 +101,7 @@ function modify( string $sql, array $params ): bool {
 // Fetch Data Functions
 // ─────────────────────────────────────────────
 
-// Fetch single row
+// Fetch a single row.
 function fetch(
 	string $table,
 	string $where = '',
@@ -108,7 +111,7 @@ function fetch(
 	return fetch_rows( $table, $where, $params, $columns, false );
 }
 
-// Fetch all rows
+// Fetch all rows.
 function fetch_all(
 	string $table,
 	string $where = '',
@@ -118,7 +121,7 @@ function fetch_all(
 	return fetch_rows( $table, $where, $params, $columns, true );
 }
 
-// Unified fetch logic
+// Unified fetch logic.
 function fetch_rows(
 	string $table,
 	string $where = '',
@@ -127,7 +130,7 @@ function fetch_rows(
 	bool $all = false
 ): array|null {
 	$cols = implode( ', ', $columns );
-	$sql = "SELECT $cols FROM " . quote_ident( $table ) . ( $where ? " WHERE $where" : '' );
+	$sql = "SELECT $cols FROM " . quote_ident( $table ) . ( $where ? " WHERE $where" : '' ); // e.g. "SELECT * FROM `users` WHERE id = :id"
 	$stmt = query( $sql, $params );
 
 	return $all
@@ -152,22 +155,19 @@ function fetch_rows(
  * @return PDOStatement   The executed statement, ready for fetch or rowCount.
  * @throws Exception      If the SQL preparation fails.
  *
- * Usage:
- *   $stmt = query( "SELECT * FROM users WHERE id = :id", [ ':id' => $user_id ] );
+ * e.g. `$stmt = query( "SELECT * FROM users WHERE id = :id", [ ':id' => $user_id ] );`
  */
 function query( string $sql, array $params = [] ): PDOStatement {
-	global $pdo;
+	global $pdo; // use the global PDO connection
 
-	$stmt = $pdo->prepare( $sql );
-	if( !$stmt ) {
-		throw new Exception( "Prepare failed: " . implode( ', ', $pdo->errorInfo() ) );
-	}
+	$stmt = $pdo->prepare( $sql ); // prepare the SQL statement
+	if( !$stmt ) throw new Exception( "Prepare failed: " . implode( ', ', $pdo->errorInfo() ) );
 
-	$stmt->execute( $params );
-	return $stmt;
+	$stmt->execute( $params ); // execute with bound parameters
+	return $stmt; // return the executed statement
 }
 
-// Optional: quote identifiers safely
+// Escapes and quotes an identifier (table or column name) for use in SQL.
 function quote_ident( string $name ): string {
 	return '`' . str_replace( '`', '``', $name ) . '`';
 }

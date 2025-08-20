@@ -1,7 +1,7 @@
 <?php
 
 // Renders a GET-based dropdown form for selecting a database table.
-function renderTableDropdown(array $tables, string $selectedTable): void {
+function renderTableDropdown( array $tables, string $selectedTable ): void {
 	?>
 	<!-- Begin GET form for table selection -->
 	<form method="get">
@@ -10,12 +10,12 @@ function renderTableDropdown(array $tables, string $selectedTable): void {
 		<select name="table" onchange="this.form.submit()">
 
 			<option value="">-- Select a table --</option> <!-- default placeholder option -->
-			<?php foreach ($tables as $table): ?>
+			<?php foreach( $tables as $table ): ?>
 
 				<!-- Render escaped table name as both value and label -->
-				<option value="<?= htmlspecialchars($table) ?>"
+				<option value="<?= htmlspecialchars( $table ) ?>"
 					<?= $table === $selectedTable ? 'selected' : '' ?>> <!-- mark selected table -->
-					<?= htmlspecialchars($table) ?>
+					<?= htmlspecialchars( $table ) ?>
 				</option>
 
 			<?php endforeach; ?>
@@ -32,22 +32,22 @@ function renderTableDropdown(array $tables, string $selectedTable): void {
  * @param array				$columns	Array of column metadata.
  * @param string|null	$primary	Name of the primary key column (if available).
  */
-function renderTable(?string $table, array $columns, ?string $primary): void {
-	if (!$table) return;
+function renderTable( ?string $table, array $columns, ?string $primary ): void {
+	if( !$table ) return;
 	?>
 
-	<h2>Table: <?= htmlspecialchars($table) ?></h2>
+	<h2>Table: <?= htmlspecialchars( $table ) ?></h2>
 
 	<!-- Begin POST form for inserting new rows -->
 	<form method="post" action="db/insert.php" id="add-form">
-		<input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>" />
+		<input type="hidden" name="table" value="<?= htmlspecialchars( $table ) ?>" />
 	</form>
 
 	<table border="1" cellpadding="5">
 		<!-- Render column headers -->
 		<tr>
-			<?php foreach ($columns as $col): ?>
-				<th><?= htmlspecialchars($col['Field']) ?></th>
+			<?php foreach( $columns as $col ): ?>
+				<th><?= htmlspecialchars( $col[ 'Field' ] ) ?></th>
 			<?php endforeach; ?>
 			<th>Actions</th>
 		</tr>
@@ -61,20 +61,20 @@ function renderTable(?string $table, array $columns, ?string $primary): void {
 }
 
 // Renders a single input row for inserting new data into the current table.
-function renderInsertRow(array $columns): void {
+function renderInsertRow( array $columns ): void {
 	?>
 	<tr class="add-row">
-		<?php foreach ($columns as $col):
-			$flags = getColumnFlags($col);
+		<?php foreach( $columns as $col ):
+			$flags = getColumnFlags( $col );
 			$name = $flags['name'];
 		?>
-			<td data-field="<?= htmlspecialchars($name) ?>">
+			<td data-field="<?= htmlspecialchars( $name ) ?>">
 				<!-- Suppress input for auto-managed fields -->
-				<?php if ($flags['is_auto'] || $flags['is_timestamp']): ?>
+				<?php if( $flags[ 'is_auto' ] || $flags[ 'is_timestamp' ] ): ?>
 					—
 				<!-- Render editable input -->
 				<?php else: ?>
-					<input name="<?= htmlspecialchars($name) ?>"
+					<input name="<?= htmlspecialchars( $name ) ?>"
 						class="add-input"
 						form="add-form"
 					/>
@@ -82,28 +82,26 @@ function renderInsertRow(array $columns): void {
 			</td>
 		<?php endforeach; ?>
 
-		<!-- Submit button scoped to #add-form -->
-		<td>
-			<button type="submit" form="add-form">Add</button>
-		</td>
+		<!-- Submit button scoped to add-form -->
+		<td><button type="submit" form="add-form">Add</button></td>
 	</tr>
 	<?php
 }
 
 // Extracts metadata flags (e.g. auto_increment, nullable) from a column definition
-function getColumnFlags(array $col): array {
-	$name = $col['Field'];
-	$type = $col['Type'];
+function getColumnFlags( array $col ): array {
+	$name = $col[ 'Field' ];
+	$type = $col[ 'Type' ];
 	return [
 		'name'         => $name,
 		'type'         => $type,
-		'is_auto'      => $col['Extra'] === 'auto_increment',
-		'is_timestamp' => str_contains($type, 'datetime')
+		'is_auto'      => $col[ 'Extra' ] === 'auto_increment',
+		'is_timestamp' => str_contains( $type, 'datetime' )
 	];
 }
 
 // Renders all data rows for the given table
-function renderTableRows(string $table, array $columns, ?string $primary): void {
+function renderTableRows( string $table, array $columns, ?string $primary ): void {
 	$rows = fetch_all($table);
 
 	if ($rows):
@@ -111,15 +109,15 @@ function renderTableRows(string $table, array $columns, ?string $primary): void 
 			?>
 
 			<!-- Begin row, tagged with primary key for JS targeting -->
-			<tr data-id="<?= htmlspecialchars($row[$primary]) ?>">
+			<tr data-id="<?= htmlspecialchars( $row[$primary] ) ?>">
 				<?php
 
 				// Render each column as an editable cell
-				foreach ($columns as $col):
-					renderEditableCell($row, $col);
+				foreach( $columns as $col ):
+					renderEditableCell( $row, $col );
 				endforeach;
 
-				renderActionCell($table, $row, $primary); ?> <!-- cell for action buttons -->
+				renderActionCell( $table, $row, $primary ); ?> <!-- cell for action buttons -->
 			</tr>
 			<?php
 		endforeach;
