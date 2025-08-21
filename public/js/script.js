@@ -214,7 +214,7 @@ function buildPayload( row ) {
 }
 
 function sendInsert( payload ) {
-	fetch( 'db/insert.php', {
+	fetch( 'api/insert.php', {
 		method: 'POST',
 		headers: { 'X-Requested-With': 'XMLHttpRequest' },
 		body: new URLSearchParams( payload )
@@ -277,7 +277,7 @@ function addTableRow( rowData, payload ) {
 
 
 function sendDelete( payload ) {
-	fetch( 'db/delete.php', {
+	fetch( 'api/delete.php', {
 		method: 'POST',
 		headers: { 'X-Requested-With': 'XMLHttpRequest' },
 		body: new URLSearchParams( payload )
@@ -299,12 +299,9 @@ function sendDelete( payload ) {
 		} );
 }
 
-/**
- * Sends a POST request to update.php with the given URL-encoded payload.
- * Alerts if the response is not 'OK'.
- */
+// Sends a POST request to update.php with the given URL-encoded payload.
 function sendUpdate( payload ) {
-	fetch( 'db/update.php', {
+	fetch( 'api/update.php', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',

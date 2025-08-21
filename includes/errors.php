@@ -1,6 +1,5 @@
 <?php
-require_once 'sql.php';
-require_once 'actions.php';
+require_once __DIR__ . '/../db/sql.php';
 
 // Send a JSON response and exit.
 function send_json( array $data, int $code = 200 ): void {

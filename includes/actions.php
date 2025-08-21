@@ -1,6 +1,6 @@
 <?php
-require_once 'sql.php';
-require_once 'errors.php';
+require_once __DIR__ . '/../db/sql.php';
+require_once __DIR__ . '/errors.php';
 
 /*
 Response codes --

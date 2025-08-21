@@ -1,7 +1,7 @@
 <?php
-require_once 'db/sql.php';
-require_once 'db/actions.php';
-require_once 'render.php';
+require_once __DIR__ . '/../db/sql.php';
+require_once __DIR__ . '/../includes/actions.php';
+require_once __DIR__ . '/../templates/render.php';
 
 $table = $_GET[ 'table' ] ?? '';
 $tables = get_table_names();

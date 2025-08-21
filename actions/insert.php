@@ -1,5 +1,6 @@
 <?php
-require_once 'errors.php';
+require_once __DIR__ . '/../includes/actions.php';
+require_once __DIR__ . '/../includes/errors.php';
 
 require_method( 'POST' );
 
