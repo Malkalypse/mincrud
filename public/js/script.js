@@ -1,67 +1,71 @@
 import { getColumnIndex, autoSize, autoSizeAll } from './utilities.js';
 
-// ─────────────────────────────────────────────
-// Action Button Functions
-// ─────────────────────────────────────────────
+/*
+Operation handling:
+------------------------------------------------------------------
+Listener	Typical Pattern		Why?
+------------------------------------------------------------------
+Add				Direct binding		Only one, static element
+Delete		Event delegation	Many, dynamic elements
+Save			Per-row binding		Dynamic, not a form, needs row context
+------------------------------------------------------------------
+*/
 
+// ─────────────────────────────────────────────
+// Initialization Functions
+// ─────────────────────────────────────────────
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	const table = document.querySelector( 'table' );
 	if( !table ) return;
 
+	initActions( table );
+	initAutosize( table );
+	setupAddForm();
+	setupDeleteHandler();
+} );
+
+// Bind actions for initial table rows
+function initActions( table ) {
 	autoSizeAll( table );
-
-	// Bind actions for all existing rows (except the add-row)
 	table.querySelectorAll( 'tr' ).forEach( row => {
-		if( !row.classList.contains( 'add-row' ) ) {
-			bindActions( row );
-		}
+		if( !row.classList.contains( 'add-row' ) ) bindActions( row );
 	} );
+}
 
-	// Global listener for any input in the table
+// Initial auto-sizing for table inputs
+function initAutosize( table ) {
 	table.addEventListener( 'input', e => {
 		const td = e.target.closest( 'td' );
 		if( !td ) return;
-		const colIndex = getColumnIndex( td );
-		autoSize( table, colIndex );
+		autoSize( table, getColumnIndex( td ) );
 	} );
+}
 
-	// Intercept Add form submission
+// Setup the [Add] form submission handler
+function setupAddForm() {
 	const addForm = document.getElementById( 'add-form' );
+
 	if( addForm ) {
 		addForm.addEventListener( 'submit', function ( e ) {
 			e.preventDefault();
-			const formData = new FormData( addForm );
-			const payload = Object.fromEntries( formData.entries() );
+			const payload = getFormPayload( addForm );
 			sendInsert( payload );
 		} );
 	}
+}
 
-	// Intercept Delete form submission (event delegation)
+// Setup the [Delete] form submission handler
+function setupDeleteHandler() {
 	document.body.addEventListener( 'submit', function ( e ) {
-		const form = e.target;
-		// Match any form containing a .delete-btn button
-		if( form.querySelector( 'button.delete-btn' ) ) {
+		const deleteForm = e.target;
+
+		if( deleteForm.querySelector( 'button.delete-btn' ) ) {
 			e.preventDefault();
-			const formData = new FormData( form );
-			const payload = Object.fromEntries( formData.entries() );
-			if( confirm( 'Delete this row?' ) ) {
-				sendDelete( payload );
-			}
+			const payload = getFormPayload( deleteForm );
+			if( confirm( 'Delete this row?' ) ) sendDelete( payload );
 		}
 	} );
-
-} );
-
-// Bind action buttons for existing rows
-function bindActions( row ) {
-	const editBtn = row.querySelector( '.edit-btn' );
-	const saveBtn = row.querySelector( '.save-btn' );
-	const cancelBtn = row.querySelector( '.cancel-btn' );
-
-	if( editBtn ) editBtn.addEventListener( 'click', () => enterEditMode( row ) );
-	if( saveBtn ) saveBtn.addEventListener( 'click', () => saveRow( row ) );
-	if( cancelBtn ) cancelBtn.addEventListener( 'click', () => cancelEdit( row ) );
 }
 
 // Enable editing for a given table row
@@ -88,8 +92,6 @@ function applyColumnWidths( row, table ) {
 
 	editableCells.forEach( ( { input } ) => {
 		const colIndex = getColumnIndex( input.closest( 'td' ) );
-
-		//console.log( `Sizing column ${colIndex} for input with value: "${input.value}"` );
 
 		if( !updatedCols.has( colIndex ) ) {
 			updatedCols.add( colIndex );
@@ -169,7 +171,6 @@ function cancelEdit( row ) {
 	toggleButtons( row, { edit: true, save: false, cancel: false } );
 }
 
-
 // Get structured data for each cell in a row
 function getEditableCells( row ) {
 	return Array.from( row.querySelectorAll( '[data-field]' ) ).map( cell => {
@@ -213,6 +214,7 @@ function buildPayload( row ) {
 	return payload;
 }
 
+// Sends a POST request to insert.php with the given URL-encoded payload.
 function sendInsert( payload ) {
 	fetch( 'api/insert.php', {
 		method: 'POST',
@@ -224,18 +226,14 @@ function sendInsert( payload ) {
 			const errorDiv = document.getElementById( 'error-message' );
 			if( data.status === 'OK' && data.row ) {
 				errorDiv.textContent = '';
-				addTableRow( data.row, payload ); // Pass payload as second argument
-				clearAddInputs();
+				addTableRow( data.row, payload );
+				document.querySelectorAll( '.add-input' ).forEach( input => input.value = '' );
 			} else if( data.error ) {
 				errorDiv.textContent = 'Error: ' + data.error;
 			} else {
 				errorDiv.textContent = 'Unknown error';
 			}
 		} );
-}
-// Helper to clear add row inputs
-function clearAddInputs() {
-	document.querySelectorAll( '.add-input' ).forEach( input => input.value = '' );
 }
 
 // Helper to add a new row to the table
@@ -275,7 +273,24 @@ function addTableRow( rowData, payload ) {
 	bindActions( newRow );
 }
 
+// Bind actions to edit, save, and cancel buttons
+function bindActions( row ) {
 
+	// Define action button handlers
+	const actions = [
+		{ selector: '.edit-btn', handler: () => enterEditMode( row ) },
+		{ selector: '.save-btn', handler: () => saveRow( row ) },
+		{ selector: '.cancel-btn', handler: () => cancelEdit( row ) }
+	];
+
+	// Apply event listeners
+	actions.forEach( ( { selector, handler } ) => {
+		const btn = row.querySelector( selector );
+		if( btn ) btn.addEventListener( 'click', handler );
+	} );
+}
+
+// Sends a POST request to delete.php with the given URL-encoded payload.
 function sendDelete( payload ) {
 	fetch( 'api/delete.php', {
 		method: 'POST',
@@ -341,3 +356,7 @@ function updateTableRow( id, newData ) {
 	autoSizeAll( table );
 }
 
+function getFormPayload( form ) {
+	const formData = new FormData( form );
+	return Object.fromEntries( formData.entries() );
+}

@@ -1,2 +1,2 @@
 <?php
-require_once __DIR__ . '/../actions/insert.php';
+require_once __DIR__ . '/../../actions/insert.php';

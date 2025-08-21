@@ -26,7 +26,6 @@ function renderTableDropdown( array $tables, string $selectedTable ): void {
 }
 
 /** Renders an HTML table for the given database table name and column metadata.
- *
  * @param string|null	$table		Name of the table to render (if null, nothing is rendered).
  * @param array				$columns	Array of column metadata.
  * @param string|null	$primary	Name of the primary key column (if available).
@@ -124,7 +123,6 @@ function renderTableRows( string $table, array $columns, ?string $primary ): voi
 }
 
 /** Renders a cell with a display span and a hidden input field for inline editing.
- *
  * @param array $row  Associative array representing a single table row.
  * @param array $col  Column metadata (must include a 'Field' key).
  */
